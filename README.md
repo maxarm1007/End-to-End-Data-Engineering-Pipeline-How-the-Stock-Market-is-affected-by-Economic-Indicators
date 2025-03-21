@@ -1,6 +1,6 @@
 # End-to-End-Data-Engineering-Pipeline-How-the-Stock-Market-is-affected-by-Economic-Indicators
 
-<b2>This project demonstrates a complete data engineering pipeline that extracts, processes, and visualizes financial and economic data from multiple sources. It combines Python, AWS, Snowflake and Power BI to build a scalable, automated data solution.<b2>
+<b2>This project demonstrates a complete data engineering pipeline that extracts, processes, and visualizes financial and economic data from multiple sources. It combines Python, AWS, Snowflake and Power BI to build a scalable, automated data solution. Please see the files above for the data extraction and AWS/ Snowflake integration and table transaformation. This project was about showing capabilties in these platforms rather than finding meaningful correlations between the stock market and economic factors.<b2>
 
 **Features**\
 **Data Extraction**
