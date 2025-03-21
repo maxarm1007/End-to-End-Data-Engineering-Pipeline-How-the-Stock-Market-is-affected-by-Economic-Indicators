@@ -18,7 +18,7 @@
 **Data Visualization**
 - Connect Snowflake to Power BI to build insightful visualizations:
 
-**Future Upgrades:**
+**Future Upgrade Ideas:**\
 **Automation:**
 - Use Python and Boto3 for seamless upload to AWS S3.
 - Schedule daily data updates using an Apache Airflow DAG.
