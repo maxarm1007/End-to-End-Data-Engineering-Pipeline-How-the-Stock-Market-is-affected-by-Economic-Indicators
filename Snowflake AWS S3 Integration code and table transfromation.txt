@@ -1,0 +1,89 @@
+CREATE DATABASE ECON;
+CREATE SCHEMA ECON_PROJECT;
+
+CREATE OR REPLACE STORAGE integration aws_s3_integration
+type = external_stage
+storage_provider = 'S3'
+enabled=true
+storage_aws_role_arn='arn:aws:iam::484907500389:role/Economic_Data_Project'
+storage_allowed_locations = ('s3://economic-stock-data/');
+
+SHOW INTEGRATIONS;
+
+DESC integration aws_s3_integration;
+
+GRANT usage on integration aws_s3_integration to role accountadmin;
+
+CREATE OR REPLACE FILE FORMAT demo_format
+  TYPE = 'CSV'
+  FIELD_DELIMITER = ','
+  SKIP_HEADER = 1
+  TRIM_SPACE = TRUE
+  DATE_FORMAT = 'YYYY-MM-DD';
+
+CREATE OR REPLACE stage demo_aws_stage
+storage_integration = aws_s3_integration
+file_format = demo_format
+url = 's3://economic-stock-data/';
+
+CREATE OR REPLACE TABLE economic_indicators (
+    Date DATE,
+    Fed_Funds_Rate FLOAT,
+    CPI FLOAT,
+    Unemployment_Rate FLOAT
+);
+
+list @demo_aws_stage;
+
+COPY INTO economic_indicators
+FROM '@demo_aws_stage/Economic Indicators.csv'
+FILE_FORMAT = (FORMAT_NAME = 'demo_format')
+ON_ERROR = 'CONTINUE';
+
+SELECT * from economic_indicators;
+
+CREATE OR REPLACE TABLE nasdaq_index (
+    Date DATE,
+    Close FLOAT,
+    Volume BIGINT
+);
+
+CREATE OR REPLACE TABLE sp500_index (
+    Date DATE,
+    Close FLOAT,
+    Volume BIGINT
+);
+
+COPY INTO nasdaq_index
+FROM '@demo_aws_stage/nasdaq.csv'
+FILE_FORMAT = (FORMAT_NAME = 'demo_format')
+ON_ERROR = 'CONTINUE';
+
+COPY INTO sp500_index
+FROM '@demo_aws_stage/S&P500.csv'
+FILE_FORMAT = (FORMAT_NAME = 'demo_format')
+ON_ERROR = 'CONTINUE';
+
+CREATE OR REPLACE VIEW combined_stock_economic_data_SP500 AS
+SELECT 
+    s.Date, 
+    s.Close, 
+    s.Volume,
+    e.FED_FUNDS_RATE, 
+    e.CPI, 
+    e.UNEMPLOYMENT_RATE
+FROM sp500_index s
+JOIN economic_indicators e ON s.Date = e.Date;
+
+SELECT * FROM combined_stock_economic_data_SP500;
+
+CREATE OR REPLACE VIEW combined_stock_economic_data_NASDAQ AS
+SELECT 
+    s.Date, 
+    s.Close, 
+    s.Volume,
+    e.FED_FUNDS_RATE, 
+    e.CPI, 
+    e.UNEMPLOYMENT_RATE
+FROM nasdaq_index s
+JOIN economic_indicators e ON s.Date = e.Date;
